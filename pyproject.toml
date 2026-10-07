@@ -1,0 +1,32 @@
+[project]
+name = "albanian-sentiment-analysis-jev"
+version = "1.0.0"
+description = "Sentiment classification of Albanian COVID-19 Facebook comments with TypeSafe's Jev, compared with the models of Kastrati et al. (2021)."
+license = "MIT"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.3",
+    "scikit-learn>=1.7",
+    "typesafe-sdk>=0.7",
+]
+
+[project.optional-dependencies]
+train = [
+    "keras-self-attention>=0.51",
+    # keras-self-attention needs Keras 2; TensorFlow 2.16 replaces tf.keras with Keras 3
+    "tensorflow>=2.15,<2.16",
+    "torch>=2.5",
+    "transformers>=4.46",
+]
+
+[tool.uv]
+package = false
+# Resolve the versions that were current when the experiment ran
+exclude-newer = "2026-10-07T00:00:00Z"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"

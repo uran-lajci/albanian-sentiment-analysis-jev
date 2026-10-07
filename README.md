@@ -92,6 +92,40 @@ The paper's ranking does not hold on test. Across all 20 re-trained models, the 
 
 For a rough human reference, pairs of annotators agree with each other at a weighted F1 of 74.6 to 79.6 on the same test comments. Matching the majority vote is easier than matching a single annotator, so this is only a loose ceiling.
 
+## Data and code
+
+| Path | Contents |
+|---|---|
+| `data/AlbAna.csv` | The dataset of Kastrati et al. (2021), unchanged from [lule-ahmedi/AlbAna](https://github.com/lule-ahmedi/AlbAna/blob/e0c8194832ab3957e9b8f53a23b97049139ba32e/Dataset/AlbAna.csv), commit `e0c8194`. SHA-256 `61983275c3ae20aac9c6b67271239f041d860eb620e47bdc208ed316a4b696a2`. |
+| `data/paper_dataset.csv` | The comments, the three annotations, the final label and the split, made from `AlbAna.csv` by `sentiment/split_paper_dataset.py`. |
+| `results/jev_predictions.csv` | Jev's probabilities and label for every comment, with the question in `sentiment/classify.py`. |
+| `results/baseline_predictions.csv.gz` | The 19 Keras and scikit-learn models of the paper, 5 seeds each, on the validation and test comments. |
+| `results/mbert_predictions.csv` | mBERT, 5 seeds, on the validation and test comments. |
+| `sentiment/` | The code that made each file above and the comparison. |
+
+The dataset belongs to its authors. Their repository states no licence.
+
+## Reproduce
+
+Every number in the results above comes from the files in `results/`:
+
+```bash
+uv sync
+uv run python -m sentiment.compare_with_paper
+```
+
+To rebuild those files from the data:
+
+```bash
+uv run python -m sentiment.split_paper_dataset
+uv run --env-file .env python -m sentiment.classify
+uv sync --extra train
+uv run python -m sentiment.train_baselines -f cc.sq.300.vec.gz
+uv run python -m sentiment.train_mbert
+```
+
+`classify` needs `TYPESAFE_API_KEY` in `.env` (see `.env.example`) and costs about USD 1.20 for the 10,742 comments. `train_baselines` needs the Albanian fastText vectors [`cc.sq.300.vec.gz`](https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.sq.300.vec.gz). `train_mbert` runs on a CUDA GPU if one is present. `uv.lock` pins the package versions that were used. A rebuild gives close but not identical numbers: Jev is not fully deterministic, and the networks vary with the hardware.
+
 ## References
 
 1. F. Kadriu, D. Murtezaj, F. Gashi, L. Ahmedi, A. Kurti, Z. Kastrati. Human-annotated dataset for social media sentiment analysis for Albanian language. *Data in Brief* 43 (2022) 108436.
